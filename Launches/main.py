@@ -188,9 +188,15 @@ def Launch_2():
     while True:
         if interrupt_flag:
             break
-        GS.reset_angle(0)
-        PID (1000, 0, 3000, -10, 0, 0)
-        P_Gyro_Turn(-90, 10, 10)
+        PID(-200, 0, 430, -5, 0, 0)
+        MMR.run_target(1000, -800, then=Stop.HOLD, wait=False)
+        MML.run_target(550, 260, then=Stop.HOLD)
+        wait(500)
+        MML.run_target(2000, 0, then=Stop.HOLD, wait=False)
+        MMR.run_target(1400, 1500, then=Stop.HOLD)
+        MMR.run_target(500, 500, then=Stop.HOLD)
+        PID(1000, 0, 200, -5, 0, 0)
+        Gyro_Turn(-45, 1000, -1000)
         break
     Robot_Break()
 def Launch_3():
@@ -199,9 +205,18 @@ def Launch_3():
     while True:
         if interrupt_flag:
             break
-        PID (-1000, 0, 5000, -10, 0, 0)
-        P_Gyro_Turn(180, 10, 10)
-        PID (-1000, 180, 5000, -10, 0, 0)
+        P_Gyro_Turn(15, 7, 7)
+        PID(-1000, 15, 560, -5, 0, 0)
+        P_Gyro_Turn(90, 0, 11)
+        MMR.run_target(-1000, -3700, then=Stop.HOLD, wait=False)
+        MML.run_target(-1000, -1500, then=Stop.HOLD, wait=False)
+        PID(-50, 90, 190, -5, 0, 0)
+        MML.reset_angle(0)
+        MML.run_target(-1300, -1300, then=Stop.HOLD)
+        MML.run_target(-5000, 1100, then=Stop.HOLD, wait=False)
+        PID(200, 90, 150, -5, 0, 0)
+        P_Gyro_Turn(30, 7, 7)
+        PID(500, 30, 1000, -5, 0, 0)
         break
     Robot_Break()
 def Launch_4():
@@ -234,7 +249,7 @@ def Launch_5():
         break
     Robot_Break()
 
-def run_miassion():
+def run_mission():
     global interrupt_flag
     secondary = False
     while True:
@@ -288,3 +303,5 @@ def run_miassion():
         if interrupt_flag:
             wait(500)  # Wait a little before re-choosing mission
             interrupt_flag = False
+
+run_mission()
