@@ -14,17 +14,28 @@ ev3 = EV3Brick()
 GS = GyroSensor(Port.S2)
 RM = Motor(Port.B)
 LM = Motor(Port.C)
-MML = Motor(Port.D)
+MML = Motor(Port.A)
 MMR = Motor(Port.A)
-LCS = ColorSensor(Port.S3)
-RCS = ColorSensor(Port.S1)
+RCS = ColorSensor(Port.S3)
+LCS = ColorSensor(Port.S1)
 
 Robot = DriveBase(LM, RM, 54.5, 140)
 
 # Variables
 interrupt_flag = False
+I = 0
+LastError = 0
+Current_Speed = 0
 
 # Header.
+def Move_Steering (Speed, Distance, Steering):
+    global interrupt_flag
+    LM.reset_angle(0)
+    RM.reset_angle(0)
+    while abs(float(Robot.distance())) < abs(Distance):
+        Robot.drive(Speed, Steering)
+    else:
+        Robot.stop()
 def Get_Direction(T1, T2):
     if T1 > T2:
         Direction = 1
@@ -107,27 +118,58 @@ def Gyro_Turn(Target, LSpeed, RSpeed):
     Gyro_Check(Target)
     print (GS.angle())
     print ("__________________________________")
-    print("D = ", D)            
-def PID (Speed, TA, TD, KP, KI, KD):
+    print("D = ", D)
+def PID_WALK (Speed, TA, KP, KI, KD):
+    global I
+    global LastError
+    
+    Error = TA - GS.angle()
+    P = KP*Error
+    I = (I + Error)*KI
+    D = (Error - LastError)*KD
+    Steering = P + I + D
+    Robot.drive(Speed, Steering)
+    LastError =  Error
+    # print(GS.angle()) 
+def Speed_Control(Speed, KA, D):
+    global Current_Speed
+
+    Initial_Speed = (Speed*(0.001*KA))
+    print(Current_Speed, Speed)
+    if abs(Current_Speed) < abs(Speed) and D == False:
+        Current_Speed = Current_Speed + Initial_Speed
+    elif D:
+        # print("Decel")
+        Current_Speed = Current_Speed - Speed*0.12
+    else:
+        Current_Speed = Speed
+    return(Current_Speed)
+
+def PID_COLOR (Speed, TA, TC, KP, KI, KD, KA):
     global interrupt_flag
     LM.reset_angle(0)
     RM.reset_angle(0)
-    LastError = 0
-    I = 0
-    while abs(float(Robot.distance())) < abs(TD):
+    P_color = str(RCS.color())
+    while str(RCS.color()) != str(TC):
         if interrupt_flag:
             break
-        Error = TA - GS.angle()
-        P = KP*Error
-        I = (I + Error)*KI
-        D = (Error - LastError)*KD
-        Steering = P + I + D
-        Robot.drive(Speed, Steering)
-        print(GS.angle())
-        LastError =  Error
+        PID_WALK(Speed, TA, KP, KI, KD, KA)
     else:
         Robot.stop()
         #Robot_Break()
+def PID (Speed, TA, TD, KP, KI, KD, KA):
+    global interrupt_flag
+    LM.reset_angle(0)
+    RM.reset_angle(0)
+    while abs(float(Robot.distance())) < abs(TD):
+        D = not(abs(float(Robot.distance())) < abs(TD - 50))
+        if interrupt_flag:
+            break
+        PID_WALK(Speed_Control(Speed, KA, D), TA, KP, KI, KD)
+    else:
+        Robot.drive(Speed/-10, 0)
+        wait(125)
+        Robot.stop(brake = True)
 def Line_Follow (Speed, C1, C2, TD, KP):
     Robot.reset()
     TC = (C1 + C2)/2
@@ -151,6 +193,12 @@ def check_interrupt():
             ev3.screen.print("Interrupted")
             break
         wait(100)
+def reset_all():
+    GS.reset_angle(0)
+    LM.reset_angle(0)
+    RM.reset_angle(0)
+    MML.reset_angle(0)
+    MMR.reset_angle(0)
 
 #Launches.
 def Launch_1():
@@ -221,17 +269,42 @@ def Launch_3():
     Robot_Break()
 def Launch_4():
     global interrupt_flag
-    ev3.screen.print("Mission 4")
+    ev3.screen.print("Mission 3")
     while True:
         if interrupt_flag:
             break
-        for i in range(4):
-            if interrupt_flag:
-                break
-            i += 1
-            GS.reset_angle(0)
-            PID (-1000, 0, 5000, 2, 0, 0)
-            P_Gyro_Turn(90, 10, 10)
+        GS.reset_angle(0)
+        PID(200, 0, 175, -5, 0, 0)
+        PID(-200, 0, 100, -5, 0, 0)
+        P_Gyro_Turn(90, 7, 7)
+        wait(500)
+        PID(-100, 90, 225, -5, 0, 0)
+        P_Gyro_Turn(180, 7, 7)
+        PID(-1000, 180, 370, -5, 0, 0)
+        P_Gyro_Turn(135, 7, 7)
+        Move_Steering(-50, 80, 0)
+        wait(500)
+        MMR.run_target(-50, 150, then=Stop.HOLD, wait=False)
+        MML.run_target(1000, 2275, then=Stop.HOLD, wait=True)
+        wait(500)
+        Move_Steering(50, 95, 0)
+        wait(500)
+        MML.run_target(1000, 3050, then=Stop.HOLD, wait=True)
+        wait(500)
+        Move_Steering(200, 40, 0)
+        P_Gyro_Turn(180, 7, 7)
+        PID(-500, 180, 230, -5, 0, 0)
+        MMR.run_target(-50, 270, then=Stop.HOLD, wait=True)
+        PID(500, 180, 150, -5, 0, 0)
+        MMR.run_target(-50, 130, then=Stop.HOLD, wait=True)
+        P_Gyro_Turn(160, 7, 7)
+        PID(-500, 160, 260, -5, 0, 0)
+        P_Gyro_Turn(180, 7, 7)
+        PID(-500, 180, 435, -5, 0, 0)
+        P_Gyro_Turn(225, 7, 7)
+        PID(200, 225, 350, -5, 0, 0)
+        wait(500)
+        PID(-500, 225, 400, -5, 0, 0)
         break
     Robot_Break()
 def Launch_5():
@@ -240,12 +313,30 @@ def Launch_5():
     while True:
         if interrupt_flag:
             break
-        GS.reset_angle(0)
-        P_Gyro_Turn(90, 10, 10)
-        wait(1000)
-        P_Gyro_Turn(180, 10, 10)
-        wait(1000)
-        P_Gyro_Turn(270, 10, 10)
+        reset_all()
+        P_Gyro_Turn(-15, 7, 7)
+        PID(-1000, -15, 395, -5, 0, 0)
+        MML.run_target(-1000, -340, then=Stop.HOLD, wait=False)
+        P_Gyro_Turn(0, 7, 7)
+        Gyro_Check(0)
+        PID(-500, 0, 500, -5, 0, 0)
+        MML.run_target(-500, 450, then=Stop.HOLD)
+        PID(500, 0, 60, -5, 0, 0)
+        P_Gyro_Turn(45, 7, 7)
+        PID_COLOR(-50, 45, Color.BLACK, -5, 0, 0)
+        wait(500)
+        LM.run_time(-1000, 1000, then=Stop.HOLD, wait=False)
+        RM.run_time(-1000, 1000, then=Stop.HOLD)
+        MMR.run_target(-10000, 3500, then=Stop.HOLD, wait=False)
+        PID(100, 45, 180, -5, 0, 0)
+        P_Gyro_Turn(-45, 7, 7)
+        PID(50, -45, 140, -5, 0, 0)
+        MMR.run_target(-10000, -1000, then=Stop.HOLD)
+        PID(-100, -45, 260, -5, 0, 0)
+        P_Gyro_Turn(-75, 0, 7)
+        PID_COLOR(-500, -75, Color.WHITE, -5, 0, 0)
+        P_Gyro_Turn(-180, 7, 7)
+        MMR.run_target(-10000, -2000, then=Stop.HOLD)
         break
     Robot_Break()
 
@@ -304,4 +395,4 @@ def run_mission():
             wait(500)  # Wait a little before re-choosing mission
             interrupt_flag = False
 
-run_mission()
+PID(-400, 0, 1000, -5, -0.1, -10, 15)
