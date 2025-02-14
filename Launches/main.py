@@ -6,6 +6,7 @@ from pybricks.parameters import Port, Stop, Direction, Button, Color
 from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile
+from pybricks.robotics import Stop
 import math
 from threading import Thread
 
@@ -14,7 +15,7 @@ ev3 = EV3Brick()
 GS = GyroSensor(Port.S2)
 RM = Motor(Port.B)
 LM = Motor(Port.C)
-MML = Motor(Port.A)
+MML = Motor(Port.D)
 MMR = Motor(Port.A)
 RCS = ColorSensor(Port.S3)
 LCS = ColorSensor(Port.S1)
@@ -161,6 +162,7 @@ def PID (Speed, TA, TD, KP, KI, KD, KA):
     global interrupt_flag
     LM.reset_angle(0)
     RM.reset_angle(0)
+    TD *= -1
     while abs(float(Robot.distance())) < abs(TD):
         D = not(abs(float(Robot.distance())) < abs(TD - 50))
         if interrupt_flag:
@@ -169,8 +171,8 @@ def PID (Speed, TA, TD, KP, KI, KD, KA):
     else:
         Robot.drive(Speed/-10, 0)
         wait(125)
-        #Robot.stop(Stop.BRAKE)
-        Robot.stop(brake = True)
+        Robot.stop(Stop.BRAKE)
+        #Robot.stop(brake = True)
 def Line_Follow (Speed, C1, C2, TD, KP):
     Robot.reset()
     TC = (C1 + C2)/2
@@ -275,26 +277,21 @@ def Launch_4():
         if interrupt_flag:
             break
         GS.reset_angle(0)
-        PID(200, 0, -175, -5, -0.1, -10, 15)
-        #PID(-200, 0, 100, -5, -0.1, -10, 15)
-        # P_Gyro_Turn(90, 7, 7)
-        # wait(500)
-        # PID(-100, 90, 225, -5, -0.1, -10, 15)
-        # P_Gyro_Turn(180, 7, 7)
-        # PID(-1000, 180, 370, -5, -0.1, -10, 15)
-        # P_Gyro_Turn(135, 7, 7)
-        # Move_Steering(-50, 80, 0)
-        # wait(500)
-        # MMR.run_target(-50, 150, then=Stop.HOLD, wait=False)
-        # MML.run_target(1000, 2275, then=Stop.HOLD, wait=True)
-        # wait(500)
-        # Move_Steering(50, 95, 0)
-        # wait(500)
-        # MML.run_target(1000, 3050, then=Stop.HOLD, wait=True)
-        # wait(500)
-        # Move_Steering(200, 40, 0)
-        # P_Gyro_Turn(180, 7, 7)
-        # PID(-500, 180, 230, -5, -0.1, -10, 15)
+        PID(200, 0, 150, -5, -0.1, -10, 15)
+        PID(-200, 0, 100, -5, -0.1, -10, 15)
+        P_Gyro_Turn(92, 10, 10)
+        PID(-300, 92, 175, -5, -0.1, -10, 15)
+        wait(500)
+        P_Gyro_Turn(182, 10, 10)
+        PID(-1000, 182, 335, -5, -0.1, -10, 15)
+        wait(500)
+        P_Gyro_Turn(132, 10, 10)
+        PID(-80, 132, 125, -5, -0.1, -10, 15)
+        MMR.run_target(-80, -200, then=Stop.HOLD, wait=False)
+        MML.run_target(-1000, -2500, then=Stop.HOLD, wait=True)
+        PID(200, 132, 100, -5, -0.1, -10, 15)
+        P_Gyro_Turn(182, 7, 7)
+        PID(-500, 182, 230, -5, -0.1, -10, 15)
         # MMR.run_target(-50, 270, then=Stop.HOLD, wait=True)
         # PID(500, 180, 150, -5, -0.1, -10, 15)
         # MMR.run_target(-50, 130, then=Stop.HOLD, wait=True)
@@ -306,7 +303,7 @@ def Launch_4():
         # PID(200, 225, 350, -5, -0.1, -10, 15)
         # wait(500)
         # PID(-500, 225, 400, -5, -0.1, -10, 15)
-        #break
+        break
     Robot_Break()
 def Launch_5():
     global interrupt_flag
