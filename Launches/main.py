@@ -146,18 +146,18 @@ def Speed_Control(Speed, KA, D):
         Current_Speed = Speed
     return(Current_Speed)
 
-def PID_COLOR (Speed, TA, TC, KP, KI, KD, KA):
+def PID_COLOR (Speed, TA, TC, Margin, KP, KI, KD, KA):
     global interrupt_flag
     LM.reset_angle(0)
     RM.reset_angle(0)
-    P_color = str(RCS.color())
-    while str(RCS.color()) != str(TC):
-        if interrupt_flag:
-            break
-        PID_WALK(Speed, TA, KP, KI, KD, KA)
-    else:
+    P_color = RCS.reflection()
+    while int(RCS.reflection()) > int(RCS-Margin) and int(RCS.reflection()) < int(RCS+Margin):
         Robot.stop()
         #Robot_Break()
+    else:
+        # if interrupt_flag:
+        #     break
+        PID_WALK(Speed, TA, KP, KI, KD, KA)
 def PID (Speed, TA, TD, KP, KI, KD, KA):
     global interrupt_flag
     LM.reset_angle(0)
@@ -211,26 +211,26 @@ def Launch_1():
         if interrupt_flag:
             break
         GS.reset_angle(0)
-        P_Gyro_Turn(-5, 7, 7)
-        PID (-1000, -5, 420, -5, 0, 0)
-        P_Gyro_Turn(0, 7, 7)
-        MMR.run_time (-1000,1700,then=Stop.HOLD)
-        PID (-30, 0, 50, -5, 0, 0)
-        MMR.run_time (1000,1700,then=Stop.HOLD)
-        P_Gyro_Turn(10, 7, 7)
-        PID (-100, 10, 100, -5, 0, 0)
-        P_Gyro_Turn(-73, 9, 9)
-        PID (-1000, -73, 290, -5, 0, 0)
-        P_Gyro_Turn(-90, 9, 9)
+        P_Gyro_Turn(-5, 10, 10)
+        PID(-1000, -5, 400, -5, -0.1, -10, 15)
+        P_Gyro_Turn(0, 10, 10)
+        MMR.run_time (-1000,1500,then=Stop.HOLD)
+        PID(-30, 0, 50, -5, -0.1, -10, 15)
+        MMR.run_time (1000,1500,then=Stop.HOLD)
+        P_Gyro_Turn(10, 10, 10)
+        PID(-100, 10, 100, -5, -0.1, -10, 15)
+        P_Gyro_Turn(-78, 10, 10)
+        PID(-1000, -78, 230, -5, -0.1, -10, 15)
+        P_Gyro_Turn(-90, 10, 10)
         Gyro_Check(-90)
-        PID (-1000, -90, 240, -5, 0, 0)
+        PID(-1000, -90, 255, -5, -0.1, -10, 15)
         MMR.run_time (-1000,1600,then=Stop.HOLD)
-        PID (-500, -90, 105, -5, 0, 0)
+        PID(-500, -90, 105, -5, -0.1, -10, 15)
         MMR.run_time (1000,1600,then=Stop.HOLD)
-        PID (-500, -90, 160, -5, 0, 0)
-        P_Gyro_Turn(-130, 7, 7)
+        PID(-500, -90, 160, -5, -0.1, -10, 15)
+        P_Gyro_Turn(-140, 12, 12)
         MMR.run_time (-1000,500,then=Stop.HOLD)
-        PID (-500, -130, 10000, -5, 0, 0)
+        PID(-500, -140, 10000, -5, -0.1, -10, 15)
         break
     Robot_Break()
 def Launch_2():
@@ -239,14 +239,14 @@ def Launch_2():
     while True:
         if interrupt_flag:
             break
-        PID(-200, 0, 430, -5, 0, 0)
+        PID(-200, 0, 430, -5, -0.1, -10, 15)
         MMR.run_target(1000, -800, then=Stop.HOLD, wait=False)
         MML.run_target(550, 260, then=Stop.HOLD)
         wait(500)
         MML.run_target(2000, 0, then=Stop.HOLD, wait=False)
         MMR.run_target(1400, 1500, then=Stop.HOLD)
         MMR.run_target(500, 500, then=Stop.HOLD)
-        PID(1000, 0, 200, -5, 0, 0)
+        PID(1000, 0, 250, -5, -0.1, -10, 15)
         Gyro_Turn(-45, 1000, -1000)
         break
     Robot_Break()
@@ -312,29 +312,32 @@ def Launch_5():
         if interrupt_flag:
             break
         reset_all()
-        P_Gyro_Turn(-15, 7, 7)
-        PID(-1000, -15, 395, -5, 0, 0)
-        MML.run_target(-1000, -340, then=Stop.HOLD, wait=False)
-        P_Gyro_Turn(0, 7, 7)
+        P_Gyro_Turn(-10, 25, 25)
+        PID(-200, -10, 520, -5, -0.1, -10, 10)
+        MML.run_target(-500, -340, then=Stop.HOLD, wait=False)
+        P_Gyro_Turn(0, 25, 25)
         Gyro_Check(0)
-        PID(-500, 0, 500, -5, 0, 0)
+        PID(-200, 0, 280, -5, -0.1, -10, 15)
         MML.run_target(-500, 450, then=Stop.HOLD)
-        PID(500, 0, 60, -5, 0, 0)
-        P_Gyro_Turn(45, 7, 7)
-        PID_COLOR(-50, 45, Color.BLACK, -5, 0, 0)
+        wait(1000)
+        PID(200, 0, 110, -5, -0.1, -10, 15)
+        P_Gyro_Turn(45, 12, 12)
+        PID(-100, 45, 120, -5, -0.1, -10, 15)
         wait(500)
-        LM.run_time(-1000, 1000, then=Stop.HOLD, wait=False)
-        RM.run_time(-1000, 1000, then=Stop.HOLD)
+        PID(-1000, 45, 65, -5, -0.1, -10, 15)
         MMR.run_target(-10000, 3500, then=Stop.HOLD, wait=False)
-        PID(100, 45, 180, -5, 0, 0)
-        P_Gyro_Turn(-45, 7, 7)
-        PID(50, -45, 140, -5, 0, 0)
-        MMR.run_target(-10000, -1000, then=Stop.HOLD)
-        PID(-100, -45, 260, -5, 0, 0)
-        P_Gyro_Turn(-75, 0, 7)
-        PID_COLOR(-500, -75, Color.WHITE, -5, 0, 0)
-        P_Gyro_Turn(-180, 7, 7)
+        PID(100, 45, 205, -5, -0.1, -10, 15)
+        P_Gyro_Turn(-45, 15, 10)
+        PID(50, -45, 145, -5, -0.1, -10, 15)
+        MMR.run_target(-10000, -500, then=Stop.HOLD)
+        PID(-300, -45, 195, -5, -0.1, -10, 15)
+        P_Gyro_Turn(-75, 0, 12)
+        PID(-200, -75, 350, -5, -0.1, -10, 15)
+        P_Gyro_Turn(-180, 12, 12)
+        MMR.run_target(10000, 350, then=Stop.HOLD)
+        PID(200, -180, 20, -5, -0.1, -10, 15)
         MMR.run_target(-10000, -2000, then=Stop.HOLD)
+        PID(-200, -180, 20, -5, -0.1, -10, 15)
         break
     Robot_Break()
 
@@ -394,4 +397,5 @@ def run_mission():
             interrupt_flag = False
 
 reset_all()
-Launch_4()
+
+Launch_5()
