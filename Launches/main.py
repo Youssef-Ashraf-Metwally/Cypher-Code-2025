@@ -216,17 +216,18 @@ def Launch_1():
         MMR.run_time (1000,1500,then=Stop.HOLD)
         P_Gyro_Turn(10, 10, 10)
         PID(-100, 10, 100, -5, -0.1, -10, 15)
-        P_Gyro_Turn(-78, 10, 10)
+        P_Gyro_Turn(-78, 7, 7)
         PID(-1000, -78, 230, -5, -0.1, -10, 15)
         P_Gyro_Turn(-90, 10, 10)
         Gyro_Check(-90)
         PID(-1000, -90, 255, -5, -0.1, -10, 15)
         MMR.run_time (-1000,1600,then=Stop.HOLD)
+        P_Gyro_Turn(-87, 7, 7)
         PID(-500, -90, 105, -5, -0.1, -10, 15)
         MMR.run_time (1000,1600,then=Stop.HOLD)
         PID(-500, -90, 160, -5, -0.1, -10, 15)
         P_Gyro_Turn(-140, 12, 12)
-        MMR.run_time (-1000,500,then=Stop.HOLD)
+        MMR.run_time (-1000,600,then=Stop.HOLD)
         PID(-500, -140, 10000, -5, -0.1, -10, 15)
     Robot_Break()
 def Launch_2():
@@ -240,12 +241,12 @@ def Launch_2():
         P_Gyro_Turn(0, 7, 7)
         PID(-200, 0, 430, -5, -0.1, -10, 15)
         MMR.run_target(1000, -800, then=Stop.HOLD, wait=False)
-        MML.run_target(550, 260, then=Stop.HOLD)
+        MML.run_target(750, 280, then=Stop.HOLD)
         wait(500)
         MML.run_target(2000, 0, then=Stop.HOLD, wait=False)
         MMR.run_target(1400, 1500, then=Stop.HOLD)
-        MMR.run_target(600, 500, then=Stop.HOLD)
-        PID(1000, 0, 250, -5, -0.1, -10, 15)
+        MMR.run_target(600, 400, then=Stop.HOLD)
+        PID(1000, 0, 230, -5, -0.1, -10, 15)
         Gyro_Turn(-45, 1000, -1000)
         break
     Robot_Break()
@@ -258,11 +259,11 @@ def Launch_3():
             break
         reset_all()
         P_Gyro_Turn(15, 7, 7)
-        PID(-250, 15, 585, -5, -0.1, -10, 15)
-        P_Gyro_Turn(90, 0, 11)
+        PID(-250, 15, 600, -5, -0.1, -10, 15)
+        P_Gyro_Turn(90, 0, 15)
         MMR.run_target(-1000, -3700, then=Stop.HOLD, wait=False)
         MML.run_target(-1000, -1500, then=Stop.HOLD, wait=False)
-        PID(-50, 90, 150, -5, -0.1, -10, 15)
+        PID(-50, 90, 190, -5, -0.1, -10, 15)
         MML.reset_angle(0)
         MML.run_target(-1300, -1400, then=Stop.HOLD)
         MML.run_target(-5000, 1100, then=Stop.HOLD, wait=False)
@@ -286,7 +287,7 @@ def Launch_4():
         MMR.stop()
         wait(500)
         MMR.reset_angle(0)
-        MMR.run_target(1600, 130, then=Stop.HOLD, wait=True)
+        MMR.run_target(1600, 140, then=Stop.HOLD, wait=True)
         MMR.run_target(-700, -100, then=Stop.HOLD, wait=True)
         MMR.run_time(1600, 1200, then=Stop.HOLD, wait=True)
         wait(500)
@@ -338,10 +339,23 @@ def Launch_5():
         PID(-200, -75, 350, -5, -0.1, -10, 15)
         P_Gyro_Turn(-180, 12, 12)
         MMR.run_target(10000, 350, then=Stop.HOLD)
-        PID(200, -180, 20, -5, -0.1, -10, 15)
+        PID(200, -180, 30, -5, -0.1, -10, 15)
         MMR.run_target(-10000, -2000, then=Stop.HOLD)
         PID(-200, -180, 20, -5, -0.1, -10, 15)
+        wait(50000)
     Robot_Break()
+def Launch_6():
+        global interrupt_flag
+        ev3.screen.clear()
+        ev3.screen.print("Mission 6")
+        while True:
+            if interrupt_flag:
+                break
+            reset_all()
+            P_Gyro_Turn(0, 7, 7)
+            PID(-50, 0, 50, -5, -0.1, -10, 15)
+            break
+        Robot_Break()
 
 
 def run_mission():
