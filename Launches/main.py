@@ -21,7 +21,6 @@ RCS = ColorSensor(Port.S3)
 LCS = ColorSensor(Port.S1)
 
 Robot = DriveBase(LM, RM, 54.5, 140)
-
 # Variables
 interrupt_flag = False
 I = 0
@@ -84,6 +83,20 @@ def Gyro_Check(Target):
             Move_Tank(100,-100)
         else:
             Robot_Break()
+def Motor_Check(Target):
+    global interrupt_flag
+
+    while float(Robot.distance()) < Target:
+        if interrupt_flag:
+            break
+        Move_Tank(100,100)
+    else:
+        while float(Robot.distance()) > Target:
+            if interrupt_flag:
+                break
+            Move_Tank(-100,-100)
+        else:
+            Robot_Break()
 def P_Gyro_Turn(Target, LP, RP):
     global interrupt_flag
     while GS.angle() != Target:
@@ -99,7 +112,6 @@ def P_Gyro_Turn(Target, LP, RP):
         Robot_Break()
 
     Gyro_Check(Target)
-    Gyro_Check(Target)
 def Gyro_Turn(Target, LSpeed, RSpeed):
     global interrupt_flag
     D = Get_Direction(Target, GS.angle())
@@ -113,7 +125,6 @@ def Gyro_Turn(Target, LSpeed, RSpeed):
     else:
         Robot_Break()
 
-    Gyro_Check(Target)
     Gyro_Check(Target)
 def PID_WALK (Speed, TA, KP, KI, KD):
     global I
@@ -142,14 +153,24 @@ def PID_COLOR (Speed, TA, TC, Margin, KP, KI, KD, KA):
     global interrupt_flag
     LM.reset_angle(0)
     RM.reset_angle(0)
-    P_color = RCS.reflection()
-    while int(RCS.reflection()) > int(RCS-Margin) and int(RCS.reflection()) < int(RCS+Margin):
-        Robot.stop()
-        #Robot_Break()
+    while not(int(RCS.reflection()) > int(TC-Margin) and int(RCS.reflection()) < int(TC+Margin)):
+        if interrupt_flag:
+            Robot.stop(Stop.BRAKE)
+            x = 1/0
+        Robot.drive(Speed, 0)
     else:
-        # if interrupt_flag:
-        #     break
-        PID_WALK(Speed, TA, KP, KI, KD, KA)
+        Robot.stop(Stop.BRAKE)
+def PID_COLOR_L (Speed, TA, TC, Margin, KP, KI, KD, KA):
+    global interrupt_flag
+    LM.reset_angle(0)
+    RM.reset_angle(0)
+    while not(int(LCS.reflection()) > int(TC-Margin) and int(LCS.reflection()) < int(TC+Margin)):
+        if interrupt_flag:
+            Robot.stop(Stop.BRAKE)
+            x = 1/0
+        Robot.drive(Speed, 0)
+    else:
+        Robot.stop(Stop.BRAKE)
 def PID (Speed, TA, TD, KP, KI, KD, KA):
     global interrupt_flag
     LM.reset_angle(0)
@@ -209,26 +230,28 @@ def Launch_1():
         reset_all()
         GS.reset_angle(0)
         P_Gyro_Turn(-5, 10, 10)
-        PID(-1000, -5, 400, -5, -0.1, -10, 15)
+        PID(-1000, -5, 390, -5, -0.1, -10, 15)
         P_Gyro_Turn(0, 10, 10)
         MMR.run_time (-1000,1500,then=Stop.HOLD)
         PID(-30, 0, 50, -5, -0.1, -10, 15)
         MMR.run_time (1000,1500,then=Stop.HOLD)
         P_Gyro_Turn(10, 10, 10)
         PID(-100, 10, 100, -5, -0.1, -10, 15)
-        P_Gyro_Turn(-78, 7, 7)
-        PID(-1000, -78, 230, -5, -0.1, -10, 15)
+        MML.run_time (-1000,1500,then=Stop.HOLD)
+        P_Gyro_Turn(-69, 7, 7)
+        PID(-300, -69, 310, -4, -0.1, -10, 15)
         P_Gyro_Turn(-90, 10, 10)
         Gyro_Check(-90)
-        PID(-1000, -90, 255, -5, -0.1, -10, 15)
+        PID(-1000, -90, 243, -5, -0.1, -10, 15)
         MMR.run_time (-1000,1600,then=Stop.HOLD)
-        P_Gyro_Turn(-87, 7, 7)
-        PID(-500, -90, 105, -5, -0.1, -10, 15)
+        PID(50, -90, 25, -5, -0.1, -10, 15)
+        MML.run_time (1000,1500,then=Stop.HOLD)
+        PID(-500, -90, 120, -5, -0.1, -10, 15)
         MMR.run_time (1000,1600,then=Stop.HOLD)
-        PID(-500, -90, 160, -5, -0.1, -10, 15)
-        P_Gyro_Turn(-140, 12, 12)
-        MMR.run_time (-1000,600,then=Stop.HOLD)
-        PID(-500, -140, 10000, -5, -0.1, -10, 15)
+        PID(-500, -90, 180, -5, -0.1, -10, 15)
+        P_Gyro_Turn(-145, 12, 12)
+        MMR.run_time (-1000,700,then=Stop.HOLD)
+        PID(-500, -145, 10000, -5, -0.1, -10, 15)
     Robot_Break()
 def Launch_2():
     global interrupt_flag
@@ -239,15 +262,18 @@ def Launch_2():
             break
         reset_all()
         P_Gyro_Turn(0, 7, 7)
-        PID(-200, 0, 430, -5, -0.1, -10, 15)
-        MMR.run_target(1000, -800, then=Stop.HOLD, wait=False)
-        MML.run_target(750, 280, then=Stop.HOLD)
+        PID(-200, 0, 200, -5, -0.1, -10, 15)
+        PID_COLOR(-50, 0, 81, 2, -5, -0.1, -10, 15)
+        MML.run_target(650, 1600, then=Stop.HOLD, wait=False)
+        PID(-60, 1, 200, -5, -0.1, -10, 15)
+        MMR.run_target(1000, -800, then=Stop.HOLD)
         wait(500)
-        MML.run_target(2000, 0, then=Stop.HOLD, wait=False)
         MMR.run_target(1400, 1500, then=Stop.HOLD)
         MMR.run_target(600, 400, then=Stop.HOLD)
-        PID(1000, 0, 230, -5, -0.1, -10, 15)
-        Gyro_Turn(-45, 1000, -1000)
+        MML.run_target(300, 1000, then=Stop.HOLD, wait=False)
+        PID(1000, 0, 150, -5, -0.1, -10, 15)
+        reset_all()
+        PID(1000, -70, 3000, -15, -0.1, -10, 15)
         break
     Robot_Break()
 def Launch_3():
@@ -258,18 +284,22 @@ def Launch_3():
         if interrupt_flag:
             break
         reset_all()
-        P_Gyro_Turn(15, 7, 7)
-        PID(-250, 15, 600, -5, -0.1, -10, 15)
-        P_Gyro_Turn(90, 0, 15)
+        P_Gyro_Turn(-55, 7, 7)
+        PID(-150, -55, 430, -5, -0.1, -10, 15)
+        P_Gyro_Turn(0, 5, 15)
+        Gyro_Check(0)
         MMR.run_target(-1000, -3700, then=Stop.HOLD, wait=False)
-        MML.run_target(-1000, -1500, then=Stop.HOLD, wait=False)
-        PID(-50, 90, 190, -5, -0.1, -10, 15)
+        MML.run_target(-1000, -1300, then=Stop.HOLD, wait=False)
+        PID(-30, 0, 165, -6, -0.1, -10, 15)
+        wait(300)
         MML.reset_angle(0)
-        MML.run_target(-1300, -1400, then=Stop.HOLD)
+        MML.run_target(-1300, -1600, then=Stop.HOLD)
         MML.run_target(-5000, 1100, then=Stop.HOLD, wait=False)
-        PID(200, 90, 150, -5, -0.1, -10, 15)
-        P_Gyro_Turn(30, 7, 7)
-        PID(500, 30, 1000, -5, -0.1, -10, 15)
+        wait(300)
+        PID(-50, 0, 15, -5, -0.1, -10, 15)
+        PID(200, 0, 150, -5, -0.1, -10, 15)
+        P_Gyro_Turn(130, 7, 7)
+        PID(-500, 130, 1000, -5, -0.1, -10, 15)
     Robot_Break()
 def Launch_4():
     global interrupt_flag
@@ -315,13 +345,15 @@ def Launch_5():
         if interrupt_flag:
             break
         reset_all()
+        PID_COLOR(-50, 0, 82, 2, -5, -0.1, -10, 15)
+        PID(-200, 0, 170, -5, -0.1, -10, 15)
+        P_Gyro_Turn(90, 7, 7)
         reset_all()
-        P_Gyro_Turn(-10, 25, 25)
-        PID(-200, -10, 520, -5, -0.1, -10, 10)
         MML.run_target(-500, -340, then=Stop.HOLD, wait=False)
-        P_Gyro_Turn(0, 25, 25)
-        Gyro_Check(0)
-        PID(-200, 0, 280, -5, -0.1, -10, 15)
+        PID(-400, 0, 750, -5, -0.1, -10, 15)
+        GS.reset_angle(0)
+        LM.reset_angle(0)
+        RM.reset_angle(0)
         MML.run_target(-500, 450, then=Stop.HOLD)
         wait(1000)
         PID(200, 0, 110, -5, -0.1, -10, 15)
@@ -344,74 +376,6 @@ def Launch_5():
         PID(-200, -180, 20, -5, -0.1, -10, 15)
         wait(50000)
     Robot_Break()
-def Launch_6():
-        global interrupt_flag
-        ev3.screen.clear()
-        ev3.screen.print("Mission 6")
-        while True:
-            if interrupt_flag:
-                break
-            reset_all()
-            P_Gyro_Turn(0, 7, 7)
-            PID(-50, 0, 50, -5, -0.1, -10, 15)
-            break
-        Robot_Break()
-
-
-def run_mission():
-    global interrupt_flag
-    secondary = False
-    while True:
-        ev3.screen.clear()
-        ev3.screen.print(secondary)
-
-        # Wait for a button press
-        while True:
-            buttons = ev3.buttons.pressed()
-            
-            # Mission 1 with Left Button
-            if Button.LEFT in buttons:
-                interrupt_flag = False
-                interrupt_thread = Thread(target=check_interrupt)
-                interrupt_thread.start()
-                if secondary:
-                    Launch_4()
-                    secondary = False
-                else:
-                    Launch_1()
-                break
-
-            # Mission 2 with Right Button
-            elif Button.RIGHT in buttons:
-                interrupt_flag = False
-                interrupt_thread = Thread(target=check_interrupt)
-                interrupt_thread.start()
-                if secondary:
-                    Launch_6()
-                    secondary = False
-                else:
-                    Launch_2()
-                break
-
-            elif Button.UP in buttons:
-                interrupt_flag = False
-                interrupt_thread = Thread(target=check_interrupt)
-                interrupt_thread.start()
-                Launch_3()
-                break
-
-            elif Button.DOWN in buttons:
-                if secondary:
-                    secondary = False
-                else:
-                    secondary = True
-                wait(50)
-                break
-
-        # If interrupted, reset and wait for the next mission
-        if interrupt_flag:
-            wait(500)  # Wait a little before re-choosing mission
-            interrupt_flag = False
 
 def menu():
 
@@ -457,11 +421,10 @@ def menu():
             # If interrupted, reset and wait for the next mission
             if interrupt_flag:
                 wait(500)  # Wait a little before re-choosing mission
-                interrupt_flag = False
+                # interrupt_flag = False
                 Running = False
                 Robot.stop(Stop.BRAKE)
                 MMR.stop()
                 MML.stop()
 
-reset_all()
 menu()

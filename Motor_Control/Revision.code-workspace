@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../../Moaaz/Self-Dev/Programming/Python/Revision"
+		}
+	],
+	"settings": {
+		"debug.openDebug": "neverOpen",
+		"python.languageServer": "None"
+	}
+}
