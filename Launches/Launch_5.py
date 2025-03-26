@@ -1,0 +1,55 @@
+#!/usr/bin/env pybricks-micropython
+import Header
+import threading
+from threading import Thread
+from pybricks.robotics import Stop
+
+#Launches.
+def Mission():
+    Header.ev3.screen.clear()
+    Header.ev3.screen.print("Mission 5")
+    Header.interrupt_flag = False
+    interrupt_thread = Thread(target=Header.check_interrupt)
+    interrupt_thread.start()
+    Header.reset_all()
+    Header.PID(-150, 0, 110, -5, -0.1, -10, 15)
+    Header.PID_COLOR_L(-50, 0, 82, 2, -5, -0.1, -10, 15)
+    Header.P_Gyro_Turn(-35, 12, 12)
+    Header.wait(200)
+    Header.PID(-100, -35, 90, -5, -0.1, -10, 15)
+    Header.PID_COLOR_L(-100, -35, 19, 2, -5, -0.1, -10, 15)
+    Header.wait(200)
+    Header.P_Gyro_Turn(0, 5, 20)
+    Header.Gyro_Check(0)
+    # Header.MML.run_target(500, 340, then=Stop.HOLD, wait=False)
+    Header.PID(-200, -1, 600, -5, -0.1, -10, 10)
+    Header.GS.reset_angle(0)
+    Header.LM.reset_angle(0)
+    Header.RM.reset_angle(0)
+    Header.MML.run_target(500, -800, then=Stop.HOLD)
+    Header.wait(1000)
+    Header.PID(200, 0, 107, -5, -0.1, -10, 15)
+    Header.P_Gyro_Turn(45, 12, 12)
+    Header.PID(-50, 45, 90, -3, -0.1, -10, 0.1)
+    Header.Robot.straight(-90)
+    Header.wait(500)
+    Header.Robot.stop()
+    Header.PID(-700, 45, 40, -5, -0.1, -10, 30)
+    Header.MMR.run_target(-10000, 3800, then=Stop.HOLD, wait=False)
+    Header.PID_COLOR(50, 45, 9, 2, -5, -0.1, -10, 15)
+    Header.PID_COLOR(50, 45, 88, 2, -5, -0.1, -10, 15)
+    Header.PID(50, 45, 80, -5, -0.1, -10, 15)
+    Header.P_Gyro_Turn(-45, 15, 0)
+    Header.PID(45, -45, 115, -5, -0.1, -10, 15)
+    Header.MMR.run_target(-10000, -500, then=Stop.HOLD)
+    Header.PID(-100, -45, 190, -5, -0.1, -10, 15)
+    Header.P_Gyro_Turn(-75, 0, 12)
+    Header.PID(-150, -75, 390, -5, -0.1, -10, 15)
+    Header.P_Gyro_Turn(-180, 12, 12)
+    Header.MMR.run_target(10000, 350, then=Stop.HOLD)
+    Header.PID(200, -180, 30, -5, -0.1, -10, 15)
+    Header.MMR.run_target(-10000, -2000, then=Stop.HOLD)
+    Header.PID(-200, -180, 20, -5, -0.1, -10, 15)
+    Header.wait(50000)
+    Header.Robot_Break()
+    Header.Running = False
