@@ -22,8 +22,9 @@ def Mission():
     Header.MMR.run_target(1400, 1500, then=Stop.HOLD)
     Header.MMR.run_target(600, 400, then=Stop.HOLD)
     Header.MML.run_target(300, 1000, then=Stop.HOLD, wait=False)
-    Header.PID(1000, 0, 150, -5, -0.1, -10, 15)
+    Header.Move_Steering(1000, 300, 0)
     Header.reset_all()
-    Header.PID(1000, -70, 3000, -15, -0.1, -10, 15)
+    # Header.PID(1000, -70, 3000, -15, -0.1, -10, 15)
+    Header.Gyro_Turn(-70, 500, -500)
     Header.Robot_Break()
     Header.Running = False

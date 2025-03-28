@@ -142,14 +142,14 @@ def PID_WALK (Speed, TA, KP, KI, KD):
     Steering = P + I + D
     Robot.drive(Speed, Steering)
     LastError =  Error
-def Speed_Control(Speed, KA, D):
+def Speed_Control(Speed, KA, D, DF):
     global Current_Speed
 
     Initial_Speed = (Speed*(0.001*KA))
     if (abs(Current_Speed) < abs(Speed)) and D == False:
         Current_Speed = Current_Speed + Initial_Speed
     elif D:
-        Current_Speed = Current_Speed - Initial_Speed*3
+        Current_Speed = Current_Speed - Initial_Speed*DF
         if abs(Current_Speed) < 50:
             Current_Speed = 50 if Speed > 0 else -50
     else:
@@ -178,7 +178,7 @@ def PID_COLOR_L (Speed, TA, TC, Margin, KP, KI, KD, KA):
         Robot.drive(Speed, 0)
     else:
         Robot.stop(Stop.BRAKE)
-def PID (Speed, TA, TD, KP, KI, KD, KA):
+def PID (Speed, TA, TD, KP, KI, KD, KA, DF=3):
     global interrupt_flag
     LM.reset_angle(0)
     RM.reset_angle(0)
@@ -188,11 +188,14 @@ def PID (Speed, TA, TD, KP, KI, KD, KA):
         if interrupt_flag:
             Robot.stop(Stop.BRAKE)
             X = 1/0
-        PID_WALK(Speed_Control(Speed, KA, D), TA, KP, KI, KD)
+        PID_WALK(Speed_Control(Speed, KA, D, DF), TA, KP, KI, KD)
     else:
         Robot.stop(Stop.BRAKE)
         Motor_Check(TD)
-        print(Robot.distance())
+        ev3.screen.clear()
+        ev3.screen.print(Robot.distance())
+        #Don't remove wait, reduce to 100
+        wait(100)
 def Line_Follow (Speed, C1, C2, TD, KP):
     Robot.reset()
     TC = (C1 + C2)/2
