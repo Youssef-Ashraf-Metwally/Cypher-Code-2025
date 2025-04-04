@@ -74,8 +74,6 @@ def Move_Tank(Left, Right):
     RM.run(Right)
 def Gyro_Check(Target):
     global interrupt_flag
-    D = Get_Direction(Target, GS.angle())
-
     while GS.angle() < Target:
         if interrupt_flag:
             break
@@ -121,8 +119,8 @@ def P_Gyro_Turn(Target, LP, RP, min_speed=50, max_speed=300):
     Gyro_Check(Target)
 def Gyro_Turn(Target, LSpeed, RSpeed):
     global interrupt_flag
-    D = Get_Direction(Target, GS.angle())
-    while D* GS.angle() < D* Target:
+    Direction= Get_Direction(Target, GS.angle())
+    while Direction* GS.angle() < Direction* Target:
         if interrupt_flag:
             Robot.stop(Stop.BRAKE)
             X = ColorSensor(Port.S4)
@@ -138,17 +136,17 @@ def PID_WALK (Speed, TA, KP, KI, KD):
     Error = TA - GS.angle()
     P = KP*Error
     I = (I + Error)*KI
-    D = (Error - LastError)*KD
-    Steering = P + I + D
+    Derrivative= (Error - LastError)*KD
+    Steering = P + I + Derrivative
     Robot.drive(Speed, Steering)
     LastError =  Error
-def Speed_Control(Speed, KA, D, DF):
+def Speed_Control(Speed, KA, Decceleration, DF):
     global Current_Speed
 
     Initial_Speed = (Speed*(0.001*KA))
-    if (abs(Current_Speed) < abs(Speed)) and D == False:
+    if (abs(Current_Speed) < abs(Speed)) and Decceleration== False:
         Current_Speed = Current_Speed + Initial_Speed
-    elif D:
+    elif Decceleration:
         Current_Speed = Current_Speed - Initial_Speed*DF
         if abs(Current_Speed) < 50:
             Current_Speed = 50 if Speed > 0 else -50
@@ -178,28 +176,48 @@ def PID_COLOR_L (Speed, TA, TC, Margin, KP, KI, KD, KA):
         Robot.drive(Speed, 0)
     else:
         Robot.stop(Stop.BRAKE)
-def PID (Speed, TA, TD, KP, KI, KD, KA, DF=3):
-    global interrupt_flag
+def PID (Speed, TA, TD, KP, KI, KD, KA, DF=3.0, doMcheck = True):
+    global interrupt_flag, I
+    Decceleration= False
     LM.reset_angle(0)
     RM.reset_angle(0)
     TD = TD*-1 if Speed < 0 else TD
     while abs(float(Robot.distance())) < abs(TD):
-        D = abs(float(Robot.distance())) > abs(TD*0.7)
+        Decceleration= abs(float(Robot.distance())) > abs(TD*0.7)
         if interrupt_flag:
             Robot.stop(Stop.BRAKE)
             X = 1/0
-        PID_WALK(Speed_Control(Speed, KA, D, DF), TA, KP, KI, KD)
+        PID_WALK(Speed_Control(Speed, KA, Decceleration, DF), TA, KP, KI, KD)
+    else:
+        Robot.stop(Stop.BRAKE)
+        if (doMcheck):
+            Motor_Check(TD)
+        ev3.screen.clear()
+        ev3.screen.print(Robot.distance())
+
+def PID_TIME (Speed, TA, Td, KP, KI, KD, KA, DF=3.0):
+    global interrupt_flag, I
+    Decceleration= False
+    LM.reset_angle(0)
+    RM.reset_angle(0)
+    TD = TD*-1 if Speed < 0 else TD
+    while abs(float(Robot.distance())) < abs(TD):
+        Decceleration= abs(float(Robot.distance())) > abs(TD*0.7)
+        if interrupt_flag:
+            Robot.stop(Stop.BRAKE)
+            X = 1/0
+        PID_WALK(Speed_Control(Speed, KA, Decceleration, DF), TA, KP, KI, KD)
     else:
         Robot.stop(Stop.BRAKE)
         Motor_Check(TD)
         ev3.screen.clear()
         ev3.screen.print(Robot.distance())
-        #Don't remove wait, reduce to 100
-        wait(100)
+
+
 def Line_Follow (Speed, C1, C2, TD, KP):
     Robot.reset()
     TC = (C1 + C2)/2
-    D = Get_Direction(C1, C2)
+    Direction= Get_Direction(C1, C2)
     while Robot.distance() > TD:
         Error = TC - RCS.reflection()
         P = KP*Error*D
