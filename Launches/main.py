@@ -20,14 +20,14 @@ import Launch_4
 import Launch_5
 
 ev3 = EV3Brick()
-GS = GyroSensor(Port.S2)
-RM = Motor(Port.B)
-LM = Motor(Port.C)
-MML = Motor(Port.D)
-MMR = Motor(Port.A)
-RCS = ColorSensor(Port.S3)
-LCS = ColorSensor(Port.S1)
-Robot = DriveBase(LM, RM, 54.5, 140)
+Gyro_Sensor = GyroSensor(Port.S2)
+Right_Motor_L = Motor(Port.B)
+Left_Motor_L = Motor(Port.C)
+Left_Motor_M = Motor(Port.D)
+Right_Motor_M = Motor(Port.A)
+R_Color_Sensor = ColorSensor(Port.S3)
+L_Color_Sensor = ColorSensor(Port.S1)
+Robot = DriveBase(Left_Motor_L, Right_Motor_L, 54.5, 140)
 
 
 def menu():
@@ -44,7 +44,11 @@ def menu():
                     if i == Current_Launch:
                         ev3.screen.print("<> " + name)
                     else:
-                        ev3.screen.print(name)  
+                        ev3.screen.print(name)
+            else:
+                ev3.screen.clear()
+                ev3.screen.print(Header.Gyro_Sensor.angle())
+                ev3.screen.print(Current_Launch)
             if Button.UP in buttons:
                 if Current_Launch == 0:
                     Current_Launch = 4
