@@ -34,6 +34,7 @@ def menu():
     Current_Launch = 0
     Launch_Names = ["Launch 1", "Launch 2", "Launch 3", "Launch 4", "Launch 5"]
     Launches = [Launch_1.Mission, Launch_2.Mission, Launch_3.Mission, Launch_4.Mission, Launch_5.Mission]
+    Alt_Launches = [Launch_3.Init, Launch_2.Mission, Launch_1.Init]
     Header.Running = False
     while True:
             buttons = ev3.buttons.pressed()
@@ -62,7 +63,10 @@ def menu():
             if Button.CENTER in buttons:
                 mission_thread = Thread(target=Launches[Current_Launch])
                 mission_thread.start()
-                Header.Running = True           
+                Header.Running = True
+            elif Button.RIGHT in buttons:
+                mission_thread = Thread(target=Alt_Launches[Current_Launch])
+                mission_thread.start()           
             if Button.LEFT in buttons:
                 Header.Running = False
             wait(100)

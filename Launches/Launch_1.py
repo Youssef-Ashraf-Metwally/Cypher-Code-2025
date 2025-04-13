@@ -5,6 +5,7 @@ from threading import Thread
 from pybricks.robotics import Stop
 
 #Launches.
+
 def Mission_1():
     Header.ev3.screen.clear()
     Header.ev3.screen.print("Mission 1")
@@ -49,6 +50,19 @@ def Mission_1():
     Header.Robot_Break()
     Header.Running = False
 
+def Init():
+    Header.ev3.screen.clear()
+    Header.ev3.screen.print("Mission 1.5")
+    Header.interrupt_flag = False
+    interrupt_thread = Thread(target=Header.check_interrupt)
+    interrupt_thread.start()
+    Header.reset_all()
+    Header.PID(-100, 0, 50, -5, -0.1, -10, 10)
+    Header.wait(200)
+    Header.PID(100, 0, 50, -5, -0.1, -10, 10)
+
+
+
 def Mission():
     Header.ev3.screen.clear()
     Header.ev3.screen.print("Mission 1")
@@ -59,25 +73,27 @@ def Mission():
     Header.Left_Motor_M.reset_angle(-70)
     Header.Right_Motor_M.run_target (1000,500,then=Stop.HOLD, wait=False)
     Header.Left_Motor_M.run_target (1000,-1040,then=Stop.HOLD, wait=False)
-    Header.PID(-500, 0, 760, -5, -0.1, -10, 10)
+    Header.PID(-500, 0, 760, -4, -0.1, -10, 7)
     Header.Left_Motor_M.run_target (500,0,then=Stop.HOLD, wait=False)
-    Header.Right_Motor_M.run_target (500,-500,then=Stop.HOLD)
+    Header.Right_Motor_M.run_target (500,-450,then=Stop.HOLD)
     Header.Right_Motor_M.run_target (500,500,then=Stop.HOLD)
     Header.P_Gyro_Turn(-90, 7, 7)
     Header.Gyro_Check(-90)
     Header.Right_Motor_M.run_target (150,0,then=Stop.HOLD, wait=False)
-    Header.Left_Motor_M.run_target (1000,-1100,then=Stop.HOLD, wait=False)
-    Header.PID(-500, -90, 540, -5, -0.1, -10, 20)
-    Header.Left_Motor_M.run_target (1000,-800,then=Stop.HOLD, wait=False)
-    Header.PID(-100, -90, 100, -5, -0.1, -10, 10)
-    Header.Right_Motor_M.run_target (500,-510,then=Stop.HOLD)
-    Header.PID(-100, -90, 150, -5, -0.1, -10, 10)
+    Header.Left_Motor_M.run_target (1000,-1050,then=Stop.HOLD, wait=False)
+    Header.PID(-500, -90, 520, -3.5, -0.1, -10, 5)
+    Header.Left_Motor_M.run_target (1000,-850,then=Stop.HOLD, wait=False)
+    Header.PID(-300, -90, 120, -5, -0.1, -10, 10)
+    Header.Right_Motor_M.run_target (500,-610,then=Stop.HOLD)
+    Header.PID(-300, -90, 150, -5, -0.1, -10, 10)
     Header.Right_Motor_M.run_target (1000,200,then=Stop.HOLD)
-    Header.Left_Motor_M.run_target (1000,-950,then=Stop.HOLD, wait=False)
-    Header.Right_Motor_M.run_target (1000,500,then=Stop.HOLD, wait=False)
-    Header.PID(-500, -90, 400, -5, -0.1, -10, 20, DF=2)
-    Header.Right_Motor_M.run_target (1000,0,then=Stop.HOLD, wait=False)
+    Header.Left_Motor_M.run_target (1000,-1000,then=Stop.HOLD, wait=False)
+    Header.Right_Motor_M.run_target (1000,350,then=Stop.HOLD, wait=False)
+    Header.PID(-500, -88, 390, -5, -0.1, -10, 20, DF=2)
+    # Header.Right_Motor_M.run_target (1000,0,then=Stop.HOLD, wait=False)
     Header.Left_Motor_M.run_target (1000,0,then=Stop.HOLD)
-    Header.Gyro_Turn(-150, 500, -100)
+    # Header.Gyro_Turn(-150, 500, -100)
+    Header.Right_Motor_M.run_target (1000,500,then=Stop.HOLD, wait=False)
+    Header.P_Gyro_Turn(-150, 8, 8)
     Header.Left_Motor_M.run_target (1500,-900,then=Stop.HOLD)
-    Header.PID(-500, -150, 800, -5, -0.1, -10, 20, 1.5)
+    Header.PID(-500, -150, 650, -5, -0.1, -10, 20, 1.5)

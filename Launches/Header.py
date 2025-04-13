@@ -144,7 +144,7 @@ def PID_COLOR_R (Speed, TA, TC, Margin, KP, KI, KD, KA):
         if interrupt_flag:
             Robot.stop(Stop.BRAKE)
             X = ColorSensor(Port.S4)
-        PID_WALK(Speed, TA, KP, KI, KD)
+        PID_WALK(Speed_Control(Speed, KA, False, 3), TA, KP, KI, KD)
     else:
         Robot.stop(Stop.BRAKE)
 def PID_COLOR_L (Speed, TA, TC, Margin, KP, KI, KD, KA):
@@ -155,7 +155,7 @@ def PID_COLOR_L (Speed, TA, TC, Margin, KP, KI, KD, KA):
         if interrupt_flag:
             Robot.stop(Stop.BRAKE)
             X = ColorSensor(Port.S4)
-        PID_WALK(Speed, TA, KP, KI, KD)
+        PID_WALK(Speed_Control(Speed, KA, False, 3), TA, KP, KI, KD)
     else:
         Robot.stop(Stop.BRAKE)
 def PID (Speed, TA, TD, KP, KI, KD, KA, DF=3.0, doMcheck = True):
@@ -174,6 +174,27 @@ def PID (Speed, TA, TD, KP, KI, KD, KA, DF=3.0, doMcheck = True):
         Robot.stop(Stop.BRAKE)
         if (doMcheck):
             Motor_Check(TD)
+        ev3.screen.clear()
+        ev3.screen.print(Robot.distance())
+def CHECK_TIME():
+    global RUN, TIME
+    wait(TIME)
+    RUN = False
+def PID_TIME (Speed, TA, Time, KP, KI, KD, KA):
+    global interrupt_flag, Integral, RUN, TIME
+    Left_Motor_L.reset_angle(0)
+    Right_Motor_L.reset_angle(0)
+    RUN = True
+    TIME = Time
+    time_thread = Thread(target=CHECK_TIME)
+    time_thread.start()
+    while RUN:
+        if interrupt_flag:
+            Robot.stop(Stop.BRAKE)
+            X = 1/0
+        PID_WALK(Speed_Control(Speed, KA, False, 3), TA, KP, KI, KD)
+    else:
+        Robot.stop(Stop.BRAKE)
         ev3.screen.clear()
         ev3.screen.print(Robot.distance())
 def check_interrupt():
@@ -197,60 +218,3 @@ def reset_all():
     Right_Motor_L.reset_angle(0)
     Left_Motor_M.reset_angle(0)
     Right_Motor_M.reset_angle(0)
-
-
-
-
-# def LineSquare (Value, Speed):
-#     while R_Color_Sensor.reflection() > Value and L_Color_Sensor.reflection() > Value:
-#         Robot.drive(Speed, 0)
-#     else:
-#         Robot.stop()
-#     if R_Color_Sensor.reflection() < Value:
-#         while L_Color_Sensor.reflection() > Value:
-#             Left_Motor_L.run(Speed)
-#         else:
-#             Left_Motor_L.brake()
-#     elif L_Color_Sensor.reflection() < Value:
-#         while R_Color_Sensor.reflection() > Value:
-#             Right_Motor_L.run(Speed)
-#         else:
-#             Right_Motor_L.brake()
-#     else: 
-#         Robot.stop()
-
-def CHECK_TIME():
-    global RUN, TIME
-    wait(TIME)
-    RUN = False
-
-
-def PID_TIME (Speed, TA, Time, KP, KI, KD, KA, DF=3.0):
-    global interrupt_flag, Integral, RUN, TIME
-    Decceleration= False
-    Left_Motor_L.reset_angle(0)
-    Right_Motor_L.reset_angle(0)
-    RUN = True
-    TIME = Time
-    time_thread = Thread(target=CHECK_TIME)
-    time_thread.start()
-    while RUN:
-        # Decceleration= abs(float(Robot.distance())) > abs(TD*0.7)
-        if interrupt_flag:
-            Robot.stop(Stop.BRAKE)
-            X = 1/0
-        PID_WALK(Speed_Control(Speed, KA, Decceleration, DF), TA, KP, KI, KD)
-    else:
-        Robot.stop(Stop.BRAKE)
-        ev3.screen.clear()
-        ev3.screen.print(Robot.distance())
-# def Line_Follow (Speed, C1, C2, TD, KP):
-#     Robot.reset()
-#     TC = (C1 + C2)/2
-#     Direction= Get_Direction(C1, C2)
-#     while Robot.distance() > TD:
-#         Error = TC - R_Color_Sensor.reflection()
-#         Proportional = KP*Error*Direction
-#         Robot.drive(Speed, Proportional)
-#     else:
-#         Robot.stop()
